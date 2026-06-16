@@ -2,15 +2,49 @@ import { useRace } from '../context/RaceContext'
 import { formatCost } from '../lib/costs'
 import type { RacerRun } from '../types'
 
-const STATUS_EMOJI: Record<RacerRun['status'], string> = {
+const STATUS_LABELS: Record<RacerRun['status'], string> = {
+  pending: 'WAITING',
+  running: 'RUNNING',
+  success: 'SUCCESS',
+  dnf_max_clicks: 'DNF — MAX CLICKS',
+  dnf_invalid_link: 'DNF — INVALID LINK',
+  dnf_repeat_page: 'DNF — REPEAT PAGE',
+  dnf_timeout: 'DNF — TIMEOUT',
+  dnf_provider_error: 'DNF — PROVIDER ERROR',
+}
+
+/** Short rank-column label (STATUS column explains the rest). */
+const STATUS_RANK: Record<RacerRun['status'], string> = {
   pending: '—',
-  running: '...',
-  success: '★',
+  running: '…',
+  success: '', // filled with numeric rank
   dnf_max_clicks: 'MAX',
   dnf_invalid_link: 'INV',
   dnf_repeat_page: 'REP',
   dnf_timeout: 'TMO',
   dnf_provider_error: 'ERR',
+}
+
+function sortRacers(racers: RacerRun[]): RacerRun[] {
+  return [...racers].sort((a, b) => {
+    const aWin = a.status === 'success'
+    const bWin = b.status === 'success'
+    if (aWin && !bWin) return -1
+    if (!aWin && bWin) return 1
+    if (aWin && bWin) return a.clicks - b.clicks
+    // Among DNF / incomplete: furthest (most clicks) first
+    return b.clicks - a.clicks
+  })
+}
+
+function golfScore(r: RacerRun, par: number): string {
+  if (r.status === 'success') {
+    const diff = r.clicks - par
+    if (diff === 0) return 'E'
+    return diff < 0 ? String(diff) : `+${diff}`
+  }
+  if (r.status === 'dnf_max_clicks') return 'MAX'
+  return 'DNF'
 }
 
 export default function ResultsPage() {
@@ -26,23 +60,15 @@ export default function ResultsPage() {
     )
   }
 
-  const sorted = [...race.racers].sort((a, b) => {
-    const rank = (r: typeof a) =>
-      r.status === 'success' ? r.clicks
-      : r.status === 'running' || r.status === 'pending' ? 998
-      : 999
-    return rank(a) - rank(b)
-  })
+  const sorted = sortRacers(race.racers)
+  let successRank = 0
 
   const winner = sorted.find((r) => r.status === 'success')
   const totalCost = race.racers.reduce((s, r) => s + r.totalCostUsd, 0)
   const par = race.maxClicks
 
-  function golfScore(r: RacerRun): string {
-    if (r.status !== 'success') return 'DNF'
-    const diff = r.clicks - par
-    if (diff === 0) return 'E'
-    return diff < 0 ? String(diff) : `+${diff}`
+  function displayGolfScore(r: RacerRun): string {
+    return golfScore(r, par)
   }
 
   return (
@@ -68,7 +94,7 @@ export default function ResultsPage() {
         <div className="border border-white px-6 py-4 mb-8 max-w-md">
           <div className="text-xs text-gray-400 tracking-widest uppercase mb-1">Winner</div>
           <div className="text-xl font-bold">{winner.competitorName}</div>
-          <div className="text-gray-400 text-sm">{winner.clicks} CLICKS · {golfScore(winner)}</div>
+          <div className="text-gray-400 text-sm">{winner.clicks} CLICKS · {displayGolfScore(winner)}</div>
         </div>
       )}
 
@@ -80,6 +106,7 @@ export default function ResultsPage() {
               <th className="py-2 pr-6">RANK</th>
               <th className="py-2 pr-6">COMPETITOR</th>
               <th className="py-2 pr-6">MODEL</th>
+              <th className="py-2 pr-4">STATUS</th>
               <th className="py-2 pr-4 text-right">CLICKS</th>
               <th className="py-2 pr-4 text-right">SCORE</th>
               <th className="py-2 pr-4 text-right">IN TOK</th>
@@ -88,20 +115,24 @@ export default function ResultsPage() {
             </tr>
           </thead>
           <tbody>
-            {sorted.map((r, i) => (
+            {sorted.map((r) => {
+              const rankCell = r.status === 'success' ? String(++successRank) : STATUS_RANK[r.status]
+              return (
               <tr key={r.id} className={`border-b border-white/10 ${r.status === 'success' ? '' : 'text-gray-500'}`}>
-                <td className="py-2 pr-6">{r.status === 'success' ? i + 1 : STATUS_EMOJI[r.status]}</td>
+                <td className="py-2 pr-6">{rankCell}</td>
                 <td className="py-2 pr-6 text-white">{r.competitorName}</td>
                 <td className="py-2 pr-6 text-gray-400">{r.modelId}</td>
-                <td className="py-2 pr-4 text-right">{r.status === 'success' ? r.clicks : '—'}</td>
+                <td className="py-2 pr-4 text-xs">{STATUS_LABELS[r.status]}</td>
+                <td className="py-2 pr-4 text-right text-white">{r.clicks}</td>
                 <td className={`py-2 pr-4 text-right font-bold ${r.status === 'success' && r.clicks < par ? 'text-green-400' : r.status === 'success' ? 'text-white' : 'text-red-400'}`}>
-                  {golfScore(r)}
+                  {displayGolfScore(r)}
                 </td>
                 <td className="py-2 pr-4 text-right">{r.totalInputTokens > 0 ? r.totalInputTokens.toLocaleString() : '—'}</td>
                 <td className="py-2 pr-4 text-right">{r.totalOutputTokens > 0 ? r.totalOutputTokens.toLocaleString() : '—'}</td>
                 <td className="py-2 text-right text-white">{r.totalCostUsd > 0 ? formatCost(r.totalCostUsd) : '—'}</td>
               </tr>
-            ))}
+              )
+            })}
           </tbody>
         </table>
       </div>
@@ -114,7 +145,9 @@ export default function ResultsPage() {
           return (
             <div key={r.id} className="border border-white/20 p-4">
               <div className="text-sm font-bold mb-1">{r.competitorName}</div>
-              <div className="text-xs text-gray-500 mb-3">{r.modelId} · {r.status === 'success' ? `${r.clicks} clicks` : STATUS_EMOJI[r.status]}</div>
+              <div className="text-xs text-gray-500 mb-3">
+                {r.modelId} · {r.clicks} click{r.clicks !== 1 ? 's' : ''} · {STATUS_LABELS[r.status]}
+              </div>
               <div className="text-xs space-y-1">
                 {path.map((page, i) => (
                   <div key={i} className={page.toLowerCase() === 'oprah winfrey' ? 'text-white font-bold' : i === 0 ? 'text-gray-500' : 'text-white'}>
