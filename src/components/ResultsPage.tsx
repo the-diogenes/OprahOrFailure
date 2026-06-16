@@ -123,7 +123,12 @@ export default function ResultsPage() {
                   </div>
                 ))}
               </div>
-              {r.turns.length > 0 && (
+              {r.status === 'dnf_provider_error' && r.turns.length > 0 && (
+                <div className="mt-3 text-xs text-red-400 border-t border-white/10 pt-2 break-all">
+                  {r.turns[r.turns.length - 1].publicScratchpad}
+                </div>
+              )}
+              {r.status !== 'dnf_provider_error' && r.turns.length > 0 && (
                 <div className="mt-3 text-xs text-gray-500 border-t border-white/10 pt-2">
                   Avg latency: {Math.round(r.turns.reduce((s, t) => s + t.latencyMs, 0) / r.turns.length)}ms
                 </div>

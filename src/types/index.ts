@@ -56,6 +56,7 @@ export interface RacerRun {
   totalInputTokens: number
   totalOutputTokens: number
   totalCostUsd: number
+  startPageTitle: string
 }
 
 export interface Race {

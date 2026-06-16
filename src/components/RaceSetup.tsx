@@ -15,19 +15,19 @@ const PROMPT_PRESETS: Record<string, string> = {
 }
 
 const MODEL_OPTIONS: Record<ProviderId, string[]> = {
-  openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1', 'o4-mini'],
-  anthropic: ['claude-haiku-3-5', 'claude-3-5-haiku-20241022', 'claude-sonnet-4-5', 'claude-3-5-sonnet-20241022'],
-  google: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'],
-  xai: ['grok-3-mini', 'grok-3', 'grok-2-1212'],
+  openai:    ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1', 'o4-mini'],
+  anthropic: ['claude-3-5-haiku-20241022', 'claude-3-5-sonnet-20241022', 'claude-opus-4-5-20250514'],
+  google:    ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash-exp'],
+  xai:       ['grok-3-mini-beta', 'grok-3-beta', 'grok-2-1212'],
   shotgunbot: ['shotgunbot-v1'],
 }
 
 const DEFAULT_COMPETITORS: CompetitorConfig[] = [
-  { id: 'openai-1', providerId: 'openai', modelId: 'gpt-4o-mini', displayName: 'GPT-4o Mini', temperature: 0.7, maxTokens: 300, enabled: true },
-  { id: 'anthropic-1', providerId: 'anthropic', modelId: 'claude-haiku-3-5', displayName: 'Claude Haiku', temperature: 0.7, maxTokens: 300, enabled: true },
-  { id: 'google-1', providerId: 'google', modelId: 'gemini-2.5-flash', displayName: 'Gemini Flash', temperature: 0.7, maxTokens: 300, enabled: true },
-  { id: 'xai-1', providerId: 'xai', modelId: 'grok-3-mini', displayName: 'Grok Mini', temperature: 0.7, maxTokens: 300, enabled: true },
-  { id: 'shotgunbot-1', providerId: 'shotgunbot', modelId: 'shotgunbot-v1', displayName: 'ShotgunBot', temperature: 0, maxTokens: 0, enabled: false },
+  { id: 'openai-1',    providerId: 'openai',    modelId: 'gpt-4o-mini',                displayName: 'GPT-4o Mini',    temperature: 0.7, maxTokens: 300, enabled: true  },
+  { id: 'anthropic-1', providerId: 'anthropic', modelId: 'claude-3-5-haiku-20241022',  displayName: 'Claude Haiku',   temperature: 0.7, maxTokens: 300, enabled: true  },
+  { id: 'google-1',    providerId: 'google',    modelId: 'gemini-2.5-flash',           displayName: 'Gemini Flash',   temperature: 0.7, maxTokens: 300, enabled: true  },
+  { id: 'xai-1',       providerId: 'xai',       modelId: 'grok-3-mini-beta',           displayName: 'Grok Mini',      temperature: 0.7, maxTokens: 300, enabled: true  },
+  { id: 'shotgunbot-1',providerId: 'shotgunbot',modelId: 'shotgunbot-v1',              displayName: 'ShotgunBot',     temperature: 0,   maxTokens: 0,   enabled: false },
 ]
 
 export default function RaceSetup() {

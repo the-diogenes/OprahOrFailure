@@ -85,11 +85,19 @@ export default function RacerColumn({ racer, startPage, maxClicks }: Props) {
         )}
       </div>
 
-      {/* Latest scratchpad */}
+      {/* Latest scratchpad / error */}
       {latestTurn && (
         <div className="mt-3 border-t border-white/10 pt-2">
-          <div className="text-xs text-gray-600 tracking-widest mb-1">NAVIGATOR LOG</div>
-          <div className="text-xs text-gray-400 leading-relaxed line-clamp-4">
+          <div className="text-xs text-gray-600 tracking-widest mb-1">
+            {latestTurn.validationStatus === 'json_error' || racer.status === 'dnf_provider_error'
+              ? 'ERROR'
+              : 'NAVIGATOR LOG'}
+          </div>
+          <div className={`text-xs leading-relaxed line-clamp-6 break-all ${
+            latestTurn.validationStatus === 'json_error' || racer.status === 'dnf_provider_error'
+              ? 'text-red-400'
+              : 'text-gray-400'
+          }`}>
             {latestTurn.publicScratchpad}
           </div>
           {latestTurn.latencyMs > 0 && (

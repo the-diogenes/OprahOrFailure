@@ -133,6 +133,7 @@ export function RaceProvider({ children }: { children: ReactNode }) {
           return runRacerTurn(
             racer,
             competitorConfig,
+            racer.startPageTitle,
             config.hostPrompt,
             config.maxClicks,
             apiKeys,

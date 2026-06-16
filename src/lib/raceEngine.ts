@@ -16,6 +16,7 @@ type StatusCallback = (racerId: string, status: RacerRun['status']) => void
 export async function runRacerTurn(
   racer: RacerRun,
   config: CompetitorConfig,
+  startPageTitle: string,
   hostPrompt: string,
   maxClicks: number,
   apiKeys: ApiKeys,
@@ -26,7 +27,7 @@ export async function runRacerTurn(
   const visited = racer.turns.map((t) => t.currentPageTitle)
   const currentPageTitle = racer.turns.length > 0
     ? racer.turns[racer.turns.length - 1].resultingPageTitle
-    : racer.turns[0]?.currentPageTitle ?? ''
+    : startPageTitle
 
   if (racer.status !== 'running') return
 
@@ -170,7 +171,7 @@ export async function runRacerTurn(
   }
 }
 
-export function makeRacerRun(config: CompetitorConfig, _startPage: string): RacerRun {
+export function makeRacerRun(config: CompetitorConfig, startPageTitle: string): RacerRun {
   return {
     id: `${config.id}-${Date.now()}`,
     competitorName: config.displayName,
@@ -184,5 +185,6 @@ export function makeRacerRun(config: CompetitorConfig, _startPage: string): Race
     totalInputTokens: 0,
     totalOutputTokens: 0,
     totalCostUsd: 0,
+    startPageTitle,
   }
 }
