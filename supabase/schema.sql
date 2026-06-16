@@ -1,4 +1,4 @@
--- Shotgun Oprah Finder — Supabase schema
+-- Oprah Or Failure — Supabase schema
 -- Run this in the Supabase SQL Editor
 
 -- ────────────────────────────────────────────────────────

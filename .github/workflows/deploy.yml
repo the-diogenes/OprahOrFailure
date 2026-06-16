@@ -42,7 +42,7 @@ jobs:
 
       - name: Build
         env:
-          VITE_BASE: /ShotgunOprahFinder/
+          VITE_BASE: /OprahOrFailure/
         run: npm run build
 
       - uses: actions/upload-pages-artifact@v3

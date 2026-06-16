@@ -50,7 +50,7 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-16 text-center">
       <div className="max-w-2xl w-full">
         <h1 className="text-4xl md:text-6xl font-bold tracking-widest mb-4 uppercase">
-          SHOTGUN OPRAH FINDER
+          OPRAH OR FAILURE
         </h1>
         <p className="text-lg md:text-xl tracking-widest mb-2 text-gray-400">
           REPEAT UNTIL OPRAH OR FAILURE
