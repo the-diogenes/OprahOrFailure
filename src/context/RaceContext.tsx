@@ -55,7 +55,7 @@ export function RaceProvider({ children }: { children: ReactNode }) {
 
   const startRace = useCallback(async (config: RaceConfig) => {
     logger.resetForRace()
-    logger.info('race', `Race starting — competitors: ${config.competitors.filter(c=>c.enabled).map(c=>c.displayName).join(', ')}`)
+    logger.info('race', `Race starting — competitors: ${config.competitors.map(c=>c.displayName).join(', ')}`)
     logger.info('race', `Keys present: openai=${!!apiKeys.openai} anthropic=${!!apiKeys.anthropic} google=${!!apiKeys.google} xai=${!!apiKeys.xai}`)
     abortRef.current = false
     setScreen('race')
@@ -64,8 +64,8 @@ export function RaceProvider({ children }: { children: ReactNode }) {
     const raceId = `race-${Date.now()}`
     const seedLabel = `#${Math.floor(Math.random() * 99999).toString().padStart(5, '0')}`
 
-    const enabledCompetitors = config.competitors.filter((c) => c.enabled)
-    const racers: RacerRun[] = enabledCompetitors.map((c) =>
+    const roster = config.competitors
+    const racers: RacerRun[] = roster.map((c) =>
       makeRacerRun(c, startPage.canonicalTitle),
     )
 
@@ -129,16 +129,20 @@ export function RaceProvider({ children }: { children: ReactNode }) {
 
       await Promise.all(
         activeRacers.map((racer) => {
-          const competitorConfig = enabledCompetitors.find(
-            (c) => c.displayName === racer.competitorName,
+          const competitorConfig = roster.find(
+            (c) => c.id === racer.competitorConfigId,
           )
           if (!competitorConfig) return Promise.resolve()
+
+          const hostPrompt = competitorConfig.hostPrompt?.trim()
+            ? competitorConfig.hostPrompt
+            : config.hostPrompt
 
           return runRacerTurn(
             racer,
             competitorConfig,
             racer.startPageTitle,
-            config.hostPrompt,
+            hostPrompt,
             config.maxClicks,
             apiKeys,
             config.includeSummary,

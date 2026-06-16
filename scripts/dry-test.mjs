@@ -49,7 +49,7 @@ console.log(`  bot chose: "${botResp.chosenLink}"`)
 console.log(`  reasoning: ${botResp.publicScratchpad}`)
 
 console.log('\n=== TEST 5: Full ShotgunBot race to Oprah ===')
-const config = { id: 'bot', providerId: 'shotgunbot', modelId: 'shotgunbot-v1', displayName: 'ShotgunBot', temperature: 0, maxTokens: 0, enabled: true }
+const config = { id: 'bot', providerId: 'shotgunbot', modelId: 'shotgunbot-v1', displayName: 'ShotgunBot', temperature: 0, maxTokens: 0 }
 let racer = makeRacerRun(config, start.canonicalTitle)
 racer.status = 'running'
 

@@ -45,6 +45,7 @@ export interface Turn {
 
 export interface RacerRun {
   id: string
+  competitorConfigId: string
   competitorName: string
   providerId: ProviderId
   modelId: string
@@ -79,7 +80,8 @@ export interface CompetitorConfig {
   displayName: string
   temperature: number
   maxTokens: number
-  enabled: boolean
+  /** When set, overrides the race-wide host prompt for this bot only. */
+  hostPrompt?: string
 }
 
 export interface RaceConfig {

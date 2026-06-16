@@ -216,6 +216,7 @@ export async function runRacerTurn(
 export function makeRacerRun(config: CompetitorConfig, startPageTitle: string): RacerRun {
   return {
     id: `${config.id}-${Date.now()}`,
+    competitorConfigId: config.id,
     competitorName: config.displayName,
     providerId: config.providerId,
     modelId: config.modelId,
