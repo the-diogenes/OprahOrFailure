@@ -82,6 +82,23 @@ export function buildUserMessage(request: AgentRequest): string {
   })
 }
 
+export function extractJsonObject(raw: string): string {
+  let text = raw.trim()
+  // Strip markdown fences anywhere in the string
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/i)
+  if (fence) text = fence[1].trim()
+
+  // Already valid JSON?
+  if (text.startsWith('{')) return text
+
+  // Find first { … last } (handles "Here is the JSON:\n{...}")
+  const start = text.indexOf('{')
+  const end = text.lastIndexOf('}')
+  if (start !== -1 && end > start) return text.slice(start, end + 1)
+
+  return text
+}
+
 export function parseAgentJson(
   raw: string,
   available: string[],
@@ -91,17 +108,21 @@ export function parseAgentJson(
   costUsd: number,
 ): AgentResponse {
   let parsed: { chosen_link?: string; public_scratchpad?: string; confidence?: number }
+  const jsonText = extractJsonObject(raw)
   try {
-    // Strip markdown code fences if present
-    const cleaned = raw.replace(/^```json?\s*/i, '').replace(/```\s*$/i, '').trim()
-    parsed = JSON.parse(cleaned)
+    parsed = JSON.parse(jsonText)
   } catch {
+    logger.error('api', `${modelId} JSON parse failed`, { raw: raw.slice(0, 300), extracted: jsonText.slice(0, 300) })
     throw new Error(`Invalid JSON from ${modelId}: ${raw.slice(0, 200)}`)
   }
 
   const chosenLink = String(parsed.chosen_link ?? '')
   const publicScratchpad = String(parsed.public_scratchpad ?? '')
   const confidence = Number(parsed.confidence ?? 0)
+
+  if (!chosenLink) {
+    throw new Error(`Missing chosen_link from ${modelId}: ${raw.slice(0, 200)}`)
+  }
 
   // Case-insensitive match
   const resolved = available.find(
