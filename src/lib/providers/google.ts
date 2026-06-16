@@ -24,11 +24,24 @@ function buildGoogleBody(request: AgentRequest, strictRetry: boolean) {
     contents: [{ role: 'user', parts: [{ text: userText }] }],
     generationConfig: {
       temperature: request.temperature,
-      maxOutputTokens: Math.max(request.maxTokens, 256),
+      // Gemini 2.5 "thinking" tokens count against maxOutputTokens — without
+      // disabling thinking, the visible JSON can truncate to a few tokens.
+      maxOutputTokens: Math.max(request.maxTokens, 512),
       responseMimeType: 'application/json',
       responseSchema: AGENT_RESPONSE_SCHEMA,
+      thinkingConfig: { thinkingBudget: 0 },
     },
   }
+}
+
+function extractGoogleText(candidate: { content?: { parts?: Array<{ text?: string; thought?: boolean }> } }): string {
+  const parts = candidate.content?.parts ?? []
+  // Prefer non-thought text parts; join if multiple
+  const texts = parts
+    .filter((p) => p.text && !p.thought)
+    .map((p) => p.text as string)
+  if (texts.length > 0) return texts.join('\n')
+  return parts.find((p) => p.text)?.text ?? ''
 }
 
 async function callGoogleOnce(
@@ -53,13 +66,14 @@ async function callGoogleOnce(
 
   const data = await res.json()
   const candidate = data.candidates?.[0]
-  const raw: string = candidate?.content?.parts?.[0]?.text ?? ''
+  const raw: string = extractGoogleText(candidate ?? {})
   const finishReason: string = candidate?.finishReason ?? 'UNKNOWN'
   const inputTokens: number = data.usageMetadata?.promptTokenCount ?? 0
   const outputTokens: number = data.usageMetadata?.candidatesTokenCount ?? 0
+  const thoughts: number = data.usageMetadata?.thoughtsTokenCount ?? 0
 
   if (finishReason !== 'STOP') {
-    logger.warn('api', `Google ${request.model} finishReason=${finishReason}`, raw.slice(0, 200))
+    logger.warn('api', `Google ${request.model} finishReason=${finishReason} out=${outputTokens} thoughts=${thoughts}`, raw.slice(0, 200))
   }
 
   return { raw, inputTokens, outputTokens, finishReason }
