@@ -1,5 +1,5 @@
 import type { LLMProviderAdapter } from './types'
-import { SYSTEM_PROMPT, buildUserMessage, parseAgentJson } from './types'
+import { SYSTEM_PROMPT, buildUserMessage, parseAgentJson, fetchWithRetry } from './types'
 import { calcCostUsd } from '../costs'
 import { logger } from '../logger'
 import type { AgentRequest, AgentResponse } from '../../types'
@@ -21,7 +21,7 @@ export const anthropicAdapter: LLMProviderAdapter = {
       ],
     }
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetchWithRetry('Anthropic', 'https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

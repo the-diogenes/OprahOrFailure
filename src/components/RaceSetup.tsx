@@ -15,18 +15,18 @@ const PROMPT_PRESETS: Record<string, string> = {
 }
 
 const MODEL_OPTIONS: Record<ProviderId, string[]> = {
-  openai:    ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1', 'o4-mini'],
-  anthropic: ['claude-3-5-haiku-20241022', 'claude-3-5-sonnet-20241022', 'claude-opus-4-5-20250514'],
-  google:    ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash-exp'],
-  xai:       ['grok-3-mini-beta', 'grok-3-beta', 'grok-2-1212'],
+  openai:    ['gpt-4o-mini', 'gpt-5.4-mini', 'gpt-5-mini', 'gpt-5.5', 'gpt-4.1-mini', 'o4-mini'],
+  anthropic: ['claude-haiku-4-5-20251001', 'claude-sonnet-4-6', 'claude-opus-4-8', 'claude-fable-5'],
+  google:    ['gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-flash-latest', 'gemini-2.5-pro', 'gemini-3-pro-preview'],
+  xai:       ['grok-4.3', 'grok-4.20-0309-non-reasoning', 'grok-4.20-0309-reasoning'],
   shotgunbot: ['shotgunbot-v1'],
 }
 
 const DEFAULT_COMPETITORS: CompetitorConfig[] = [
   { id: 'openai-1',    providerId: 'openai',    modelId: 'gpt-4o-mini',                displayName: 'GPT-4o Mini',    temperature: 0.7, maxTokens: 300, enabled: true  },
-  { id: 'anthropic-1', providerId: 'anthropic', modelId: 'claude-3-5-haiku-20241022',  displayName: 'Claude Haiku',   temperature: 0.7, maxTokens: 300, enabled: true  },
+  { id: 'anthropic-1', providerId: 'anthropic', modelId: 'claude-haiku-4-5-20251001',  displayName: 'Claude Haiku',   temperature: 0.7, maxTokens: 300, enabled: true  },
   { id: 'google-1',    providerId: 'google',    modelId: 'gemini-2.5-flash',           displayName: 'Gemini Flash',   temperature: 0.7, maxTokens: 300, enabled: true  },
-  { id: 'xai-1',       providerId: 'xai',       modelId: 'grok-3-mini-beta',           displayName: 'Grok Mini',      temperature: 0.7, maxTokens: 300, enabled: true  },
+  { id: 'xai-1',       providerId: 'xai',       modelId: 'grok-4.3',                   displayName: 'Grok 4.3',       temperature: 0.7, maxTokens: 300, enabled: true  },
   { id: 'shotgunbot-1',providerId: 'shotgunbot',modelId: 'shotgunbot-v1',              displayName: 'ShotgunBot',     temperature: 0,   maxTokens: 0,   enabled: false },
 ]
 

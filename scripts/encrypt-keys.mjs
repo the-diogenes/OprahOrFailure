@@ -17,11 +17,11 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const envPath = path.join(__dirname, '..', '.env')
 
 // ── Parse .env ───────────────────────────────────────────────────────────────
-const envLines = fs.readFileSync(envPath, 'utf8').split('\n')
+const envLines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/)
 const env = {}
 for (const line of envLines) {
   const m = line.match(/^([^=]+)=(.*)$/)
-  if (m) env[m[1].trim()] = m[2].trim()
+  if (m) env[m[1].trim()] = m[2].trim().replace(/\r$/, '')
 }
 
 const keys = {

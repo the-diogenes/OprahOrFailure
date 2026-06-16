@@ -3,10 +3,10 @@ import type { ApiKeys } from '../types'
 // Encrypted API keys — safe to commit. AES-256-GCM, PBKDF2 200k rounds.
 // Regenerate with: node scripts/encrypt-keys.mjs
 export const VAULT = {
-  "salt": "PMpjl9/UfWQAkBXHRsPR5g==",
-  "iv": "SC9/6PmWUWSelKI7",
-  "tag": "i1TTSrhFEBM8LmVcbD1Fvw==",
-  "ct": "OoIekwYn7GMQdTQW6u/uRlPuVxwB5Yxt+Rg73BL1dovmxcoxAUjT+kjipWdm0WNQ0KARihrFgPMKpWkO+BiYpo07WP0lCmASE4Ejuqo7a9H++fn5AJSE4qCgLpi9nEFNR3s9QNgTOKLrMfhcnzUAlTPsuoHoDS0i26aaBQKbuzUY8OHVgXH7KmOu3A46Z6oS6f+xI5btWmc609qQ6/xgtwvb+Mbggg3sWsfg9I1vWxa2v9i97vV071tmZOlVOHCvfopVOTfUVw9Hfaz1x6Ocgw4k3g3vMOhK17222k+JxQ0YNkLplSF6yGlX7JEfrlA2lXkQKAZkgGpT96EO6GScpY3fbhMwL96/EpCvYCZxWBqfAuPDhg8+4bB3u9RsYOtoAVhVgIfBx/aqNumek/EG2cC2ihLRkrxMRmYz3avgn3yW+cWx7dorbWjKE/9FNEFPf3z7kRk2AXcpo+31qzhfSx/1nKcZwp/Q18Qm05DUOch2m5IwG6piyzLZqyPYzqlHB18JaZtWbCmLX2NTboyaAPZDJSjeKrY/wWoHVsoklhR/YdQ+Vk4aDXbYxrgetRjAQdkGixkwKJpAkR3O"
+  "salt": "Gox4OtykUSmEjvmp4xJ6Yw==",
+  "iv": "55LFasQIRifv0Z1o",
+  "tag": "Q9jB0RuZ3YMr3DvKJTr8AQ==",
+  "ct": "bvr3Z4Vm1t5P++wbMrxsy6AVu6BbAzC/Bewa9YEAzoGLy/EH1190fhAuoeNs+UZv63xLETWGDjfzFwcRLvKKJXPD29s/qgFcrIHQZ/nj3OUDoMp5xcbM3t4d3J7zWUnmfX/Ye5ou/6zfTpIGnVnH+gP9O/MdjK+nacUJEa8eXSQqFoTHniDAbHO9YT0VER6cAo0PufM7KNPeVQgpqVOWvQRdjUSURjgtgibphSqGPuZJl9wNMt1MwD4Fog17lGyoLIFbh4Zx5iwFZ6y7HPv70WGYFJxt/SIZ9HpJK+N63S6kuOe0heqeYV1ravbGvjiHdu2X/c3DijNhEPgbFYtg9aNbWMNYAZjSr/Tf5SE58VKhD64PXS7ioyqYd5Q3qDqbZrwIBzbutXfjkXMM/FYsOOmbE5UodxmMJn4C0z3fpN2tgRo4NDTC9X7CnJktUc4dG9HB6ZjTnzkgte0M5vhl/jbkUUUsU87S2DAdA8bTO4rdbSfI+5HNEq//wTDaBtoqBfjO30CjvXXQPwCgkk5qredomUT+hHUavzRavIFiCjSNRXHkk7K2NXwj77DBOK4NVJPnD3QuodyHOTs0"
 } as const
 
 function b64(s: string): Uint8Array {

@@ -1,10 +1,54 @@
 import type { AgentRequest, AgentResponse } from '../../types'
+import { logger } from '../logger'
 
 export interface LLMProviderAdapter {
   id: string
   displayName: string
   defaultModels: string[]
   callAgent(request: AgentRequest, apiKey: string): Promise<AgentResponse>
+}
+
+const RETRYABLE_STATUSES = [408, 409, 425, 429, 500, 502, 503, 504, 529]
+const MAX_RETRIES = 3
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+
+// fetch wrapper that retries transient errors (rate limits, overload, 5xx)
+// with exponential backoff + jitter. Honors Retry-After when present.
+export async function fetchWithRetry(
+  label: string,
+  url: string,
+  init: RequestInit,
+): Promise<Response> {
+  let lastRes: Response | null = null
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    let res: Response
+    try {
+      res = await fetch(url, init)
+    } catch (err) {
+      // Network error (DNS, CORS, offline) — retry a couple times
+      if (attempt === MAX_RETRIES) throw err
+      const delay = 700 * 2 ** attempt + Math.random() * 300
+      logger.warn('api', `${label} network error — retry ${attempt + 1}/${MAX_RETRIES} in ${Math.round(delay)}ms`, String(err))
+      await sleep(delay)
+      continue
+    }
+
+    if (res.ok || !RETRYABLE_STATUSES.includes(res.status) || attempt === MAX_RETRIES) {
+      return res
+    }
+
+    lastRes = res
+    const retryAfter = Number(res.headers.get('retry-after'))
+    const delay = Number.isFinite(retryAfter) && retryAfter > 0
+      ? retryAfter * 1000
+      : 700 * 2 ** attempt + Math.random() * 300
+    logger.warn('api', `${label} ${res.status} — retry ${attempt + 1}/${MAX_RETRIES} in ${Math.round(delay)}ms`)
+    // Drain the body so the connection can be reused
+    try { await res.text() } catch { /* ignore */ }
+    await sleep(delay)
+  }
+  return lastRes as Response
 }
 
 export const SYSTEM_PROMPT = `You are a Wikipedia navigation agent competing in a race to reach the Oprah Winfrey Wikipedia page.

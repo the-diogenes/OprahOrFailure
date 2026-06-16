@@ -1,5 +1,5 @@
 import type { LLMProviderAdapter } from './types'
-import { SYSTEM_PROMPT, buildUserMessage, parseAgentJson } from './types'
+import { SYSTEM_PROMPT, buildUserMessage, parseAgentJson, fetchWithRetry } from './types'
 import { calcCostUsd } from '../costs'
 import { logger } from '../logger'
 import type { AgentRequest, AgentResponse } from '../../types'
@@ -22,7 +22,7 @@ export const openaiAdapter: LLMProviderAdapter = {
       ],
     }
 
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    const res = await fetchWithRetry('OpenAI', 'https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
