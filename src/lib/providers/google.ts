@@ -1,6 +1,7 @@
 import type { LLMProviderAdapter } from './types'
 import { SYSTEM_PROMPT, buildUserMessage, parseAgentJson } from './types'
 import { calcCostUsd } from '../costs'
+import { logger } from '../logger'
 import type { AgentRequest, AgentResponse } from '../../types'
 
 export const googleAdapter: LLMProviderAdapter = {
@@ -9,6 +10,7 @@ export const googleAdapter: LLMProviderAdapter = {
   defaultModels: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash'],
 
   async callAgent(request: AgentRequest, apiKey: string): Promise<AgentResponse> {
+    logger.info('api', `Google → ${request.model} | page: "${request.gameState.currentPage.title}" | key: ${apiKey ? apiKey.slice(0,8)+'…' : 'MISSING'}`)
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${request.model}:generateContent?key=${apiKey}`
 
     const body = {
@@ -29,6 +31,7 @@ export const googleAdapter: LLMProviderAdapter = {
 
     if (!res.ok) {
       const err = await res.text()
+      logger.error('api', `Google ${res.status} error`, err)
       throw new Error(`Google error ${res.status}: ${err}`)
     }
 
@@ -37,6 +40,7 @@ export const googleAdapter: LLMProviderAdapter = {
     const inputTokens: number = data.usageMetadata?.promptTokenCount ?? 0
     const outputTokens: number = data.usageMetadata?.candidatesTokenCount ?? 0
     const costUsd = calcCostUsd(request.model, inputTokens, outputTokens)
+    logger.info('api', `Google ✓ ${request.model} | in:${inputTokens} out:${outputTokens}`)
 
     return parseAgentJson(
       raw,

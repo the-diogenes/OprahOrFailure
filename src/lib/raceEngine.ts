@@ -1,5 +1,6 @@
 import { fetchPage, isOprah, validateLink, resolveLink, OPRAH_TITLE } from './wikipedia'
 import { PROVIDERS } from './providers'
+import { logger } from './logger'
 import type { ApiKeys, RacerRun, Turn, CompetitorConfig } from '../types'
 import type { AgentRequest } from '../types'
 
@@ -29,7 +30,12 @@ export async function runRacerTurn(
     ? racer.turns[racer.turns.length - 1].resultingPageTitle
     : startPageTitle
 
-  if (racer.status !== 'running') return
+  logger.info('engine', `[${racer.competitorName}] Turn ${racer.turns.length + 1} — current: "${currentPageTitle}" | clicks: ${racer.clicks}/${maxClicks}`)
+
+  if (racer.status !== 'running') {
+    logger.warn('engine', `[${racer.competitorName}] Skipping — status is "${racer.status}"`)
+    return
+  }
 
   const t0 = Date.now()
 
@@ -37,6 +43,7 @@ export async function runRacerTurn(
   try {
     page = await fetchPage(currentPageTitle)
   } catch (err) {
+    logger.error('engine', `[${racer.competitorName}] Wikipedia fetch failed for "${currentPageTitle}"`, String(err))
     onStatus(racer.id, 'dnf_provider_error')
     return
   }
@@ -82,6 +89,7 @@ export async function runRacerTurn(
   try {
     agentResponse = await provider.callAgent(agentReq, apiKey)
   } catch (err) {
+    logger.error('engine', `[${racer.competitorName}] Provider call failed`, String(err))
     const turn: Turn = {
       turnIndex: racer.turns.length,
       currentPageTitle: page.canonicalTitle,

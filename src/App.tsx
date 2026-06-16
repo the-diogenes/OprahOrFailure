@@ -3,6 +3,7 @@ import LandingPage from './components/LandingPage'
 import RaceSetup from './components/RaceSetup'
 import RaceDashboard from './components/RaceDashboard'
 import ResultsPage from './components/ResultsPage'
+import LogPanel from './components/LogPanel'
 
 function AppContent() {
   const { screen } = useRace()
@@ -12,6 +13,7 @@ function AppContent() {
       {screen === 'setup' && <RaceSetup />}
       {screen === 'race' && <RaceDashboard />}
       {screen === 'results' && <ResultsPage />}
+      <LogPanel />
     </>
   )
 }

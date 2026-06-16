@@ -1,6 +1,7 @@
 import type { LLMProviderAdapter } from './types'
 import { SYSTEM_PROMPT, buildUserMessage, parseAgentJson } from './types'
 import { calcCostUsd } from '../costs'
+import { logger } from '../logger'
 import type { AgentRequest, AgentResponse } from '../../types'
 
 export const openaiAdapter: LLMProviderAdapter = {
@@ -9,6 +10,7 @@ export const openaiAdapter: LLMProviderAdapter = {
   defaultModels: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini', 'gpt-4.1', 'o4-mini'],
 
   async callAgent(request: AgentRequest, apiKey: string): Promise<AgentResponse> {
+    logger.info('api', `OpenAI → ${request.model} | page: "${request.gameState.currentPage.title}" | links: ${request.gameState.currentPage.availableLinks.length} | key: ${apiKey ? apiKey.slice(0,8)+'…' : 'MISSING'}`)
     const body = {
       model: request.model,
       temperature: request.temperature,
@@ -31,6 +33,7 @@ export const openaiAdapter: LLMProviderAdapter = {
 
     if (!res.ok) {
       const err = await res.text()
+      logger.error('api', `OpenAI ${res.status} error`, err)
       throw new Error(`OpenAI error ${res.status}: ${err}`)
     }
 
@@ -39,6 +42,7 @@ export const openaiAdapter: LLMProviderAdapter = {
     const inputTokens: number = data.usage?.prompt_tokens ?? 0
     const outputTokens: number = data.usage?.completion_tokens ?? 0
     const costUsd = calcCostUsd(request.model, inputTokens, outputTokens)
+    logger.info('api', `OpenAI ✓ ${request.model} | in:${inputTokens} out:${outputTokens} | chose: "${JSON.parse(raw.replace(/^```json?\s*/i,'').replace(/```\s*$/i,'').trim()).chosen_link ?? '?'}"`)
 
     return parseAgentJson(
       raw,

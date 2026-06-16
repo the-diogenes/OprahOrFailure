@@ -1,6 +1,7 @@
 import type { LLMProviderAdapter } from './types'
 import { SYSTEM_PROMPT, buildUserMessage, parseAgentJson } from './types'
 import { calcCostUsd } from '../costs'
+import { logger } from '../logger'
 import type { AgentRequest, AgentResponse } from '../../types'
 
 export const xaiAdapter: LLMProviderAdapter = {
@@ -9,6 +10,7 @@ export const xaiAdapter: LLMProviderAdapter = {
   defaultModels: ['grok-3-mini', 'grok-3', 'grok-2-1212'],
 
   async callAgent(request: AgentRequest, apiKey: string): Promise<AgentResponse> {
+    logger.info('api', `xAI → ${request.model} | page: "${request.gameState.currentPage.title}" | key: ${apiKey ? apiKey.slice(0,8)+'…' : 'MISSING'}`)
     const body = {
       model: request.model,
       temperature: request.temperature,
@@ -31,6 +33,7 @@ export const xaiAdapter: LLMProviderAdapter = {
 
     if (!res.ok) {
       const err = await res.text()
+      logger.error('api', `xAI ${res.status} error`, err)
       throw new Error(`xAI error ${res.status}: ${err}`)
     }
 
@@ -39,6 +42,7 @@ export const xaiAdapter: LLMProviderAdapter = {
     const inputTokens: number = data.usage?.prompt_tokens ?? 0
     const outputTokens: number = data.usage?.completion_tokens ?? 0
     const costUsd = calcCostUsd(request.model, inputTokens, outputTokens)
+    logger.info('api', `xAI ✓ ${request.model} | in:${inputTokens} out:${outputTokens}`)
 
     return parseAgentJson(
       raw,

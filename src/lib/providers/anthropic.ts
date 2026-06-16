@@ -1,6 +1,7 @@
 import type { LLMProviderAdapter } from './types'
 import { SYSTEM_PROMPT, buildUserMessage, parseAgentJson } from './types'
 import { calcCostUsd } from '../costs'
+import { logger } from '../logger'
 import type { AgentRequest, AgentResponse } from '../../types'
 
 export const anthropicAdapter: LLMProviderAdapter = {
@@ -9,6 +10,7 @@ export const anthropicAdapter: LLMProviderAdapter = {
   defaultModels: ['claude-haiku-3-5', 'claude-3-5-haiku-20241022', 'claude-sonnet-4-5', 'claude-3-5-sonnet-20241022'],
 
   async callAgent(request: AgentRequest, apiKey: string): Promise<AgentResponse> {
+    logger.info('api', `Anthropic → ${request.model} | page: "${request.gameState.currentPage.title}" | key: ${apiKey ? apiKey.slice(0,16)+'…' : 'MISSING'}`)
     const body = {
       model: request.model,
       temperature: request.temperature,
@@ -32,6 +34,7 @@ export const anthropicAdapter: LLMProviderAdapter = {
 
     if (!res.ok) {
       const err = await res.text()
+      logger.error('api', `Anthropic ${res.status} error`, err)
       throw new Error(`Anthropic error ${res.status}: ${err}`)
     }
 
@@ -40,6 +43,7 @@ export const anthropicAdapter: LLMProviderAdapter = {
     const inputTokens: number = data.usage?.input_tokens ?? 0
     const outputTokens: number = data.usage?.output_tokens ?? 0
     const costUsd = calcCostUsd(request.model, inputTokens, outputTokens)
+    logger.info('api', `Anthropic ✓ ${request.model} | in:${inputTokens} out:${outputTokens}`)
 
     return parseAgentJson(
       raw,

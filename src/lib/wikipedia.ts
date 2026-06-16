@@ -1,4 +1,5 @@
 import type { WikiPage } from '../types'
+import { logger } from './logger'
 
 const WIKI_API = 'https://en.wikipedia.org/w/api.php'
 const OPRAH_TITLE = 'Oprah Winfrey'
@@ -14,25 +15,29 @@ function buildParams(params: Record<string, string>): string {
 }
 
 export async function getRandomPage(): Promise<WikiPage> {
-  const url = buildParams({
-    action: 'query',
-    list: 'random',
-    rnnamespace: '0',
-    rnlimit: '1',
-  })
-  const res = await fetch(url)
-  const data = await res.json()
-  const title: string = data.query.random[0].title
-  return fetchPage(title)
+  logger.info('wiki', 'Fetching random Wikipedia page...')
+  try {
+    const url = buildParams({ action: 'query', list: 'random', rnnamespace: '0', rnlimit: '1' })
+    const res = await fetch(url)
+    const data = await res.json()
+    const title: string = data.query.random[0].title
+    logger.info('wiki', `Random page selected: "${title}"`)
+    return fetchPage(title)
+  } catch (err) {
+    logger.error('wiki', 'Failed to fetch random page', String(err))
+    throw err
+  }
 }
 
 export async function fetchPage(title: string): Promise<WikiPage> {
   const normalized = normalizeTitle(title)
 
   if (pageCache.has(normalized)) {
+    logger.debug('wiki', `Cache hit: "${normalized}"`)
     return pageCache.get(normalized)!
   }
 
+  logger.info('wiki', `Fetching page: "${normalized}"`)
   const [infoRes, linksRes] = await Promise.all([
     fetch(buildParams({
       action: 'query',
@@ -80,6 +85,7 @@ export async function fetchPage(title: string): Promise<WikiPage> {
   pageCache.set(normalized, wikiPage)
   pageCache.set(canonicalTitle, wikiPage)
 
+  logger.info('wiki', `Fetched "${canonicalTitle}" — ${links.length} links`)
   return wikiPage
 }
 

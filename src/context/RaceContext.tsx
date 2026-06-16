@@ -5,6 +5,7 @@ import { runRacerTurn, makeRacerRun } from '../lib/raceEngine'
 import { saveRace, saveTurn } from '../lib/db'
 import { loadSavedKeys, saveKeys, clearSavedKeys } from '../lib/keyStore'
 import { decryptVault } from '../lib/adminVault'
+import { logger } from '../lib/logger'
 
 type Screen = 'landing' | 'setup' | 'race' | 'results'
 
@@ -53,6 +54,9 @@ export function RaceProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const startRace = useCallback(async (config: RaceConfig) => {
+    logger.resetForRace()
+    logger.info('race', `Race starting — competitors: ${config.competitors.filter(c=>c.enabled).map(c=>c.displayName).join(', ')}`)
+    logger.info('race', `Keys present: openai=${!!apiKeys.openai} anthropic=${!!apiKeys.anthropic} google=${!!apiKeys.google} xai=${!!apiKeys.xai}`)
     abortRef.current = false
     setScreen('race')
 
