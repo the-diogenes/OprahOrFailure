@@ -2,6 +2,15 @@ import { useRace } from '../context/RaceContext'
 import RacerColumn from './RacerColumn'
 import { formatCost } from '../lib/costs'
 
+/** Mobile grid columns so every racer fits on screen without horizontal scroll. */
+function mobileGridClass(count: number): string {
+  if (count <= 2) return 'max-md:grid-cols-2'
+  if (count <= 4) return 'max-md:grid-cols-2 max-md:landscape:grid-cols-4'
+  if (count <= 6) return 'max-md:grid-cols-3 max-md:landscape:grid-cols-3'
+  if (count <= 9) return 'max-md:grid-cols-3 max-md:landscape:grid-cols-5'
+  return 'max-md:grid-cols-5'
+}
+
 export default function RaceDashboard() {
   const { race, setScreen, stopRace } = useRace()
 
@@ -23,21 +32,23 @@ export default function RaceDashboard() {
   })
 
   return (
-    <div className="min-h-screen px-4 py-8">
+    <div className="flex flex-col min-h-[100dvh] px-2 py-3 pb-10 md:px-4 md:py-8 md:min-h-screen">
       {/* Header */}
-      <div className="max-w-full mb-6 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold tracking-widest uppercase">RACE {race.seedLabel}</h2>
-          <div className="text-xs text-gray-400 mt-1 space-x-4">
-            <span>START: <span className="text-white">{race.startPageTitle}</span></span>
+      <div className="shrink-0 max-w-full mb-3 md:mb-6 flex flex-wrap items-start justify-between gap-2 md:gap-4">
+        <div className="min-w-0">
+          <h2 className="text-lg md:text-2xl font-bold tracking-widest uppercase truncate">
+            RACE {race.seedLabel}
+          </h2>
+          <div className="text-[10px] md:text-xs text-gray-400 mt-1 flex flex-wrap gap-x-3 gap-y-0.5">
+            <span className="truncate max-w-full">START: <span className="text-white">{race.startPageTitle}</span></span>
             <span>TARGET: <span className="text-white">{race.targetPageTitle}</span></span>
             <span>PAR: <span className="text-white">{race.maxClicks}</span></span>
             {totalRaceCost > 0 && (
-              <span>RACE COST: <span className="text-white">{formatCost(totalRaceCost)}</span></span>
+              <span className="hidden sm:inline">RACE COST: <span className="text-white">{formatCost(totalRaceCost)}</span></span>
             )}
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2 md:gap-3 shrink-0">
           {!allDone && (
             <button
               onClick={stopRace}
@@ -63,23 +74,23 @@ export default function RaceDashboard() {
         </div>
       </div>
 
-      {/* Race columns */}
-      <div className="overflow-x-auto">
-        <div className="flex gap-6 min-w-fit pb-4">
-          {sorted.map((racer) => (
-            <RacerColumn
-              key={racer.id}
-              racer={racer}
-              startPage={race.startPageTitle}
-              maxClicks={race.maxClicks}
-            />
-          ))}
-        </div>
+      {/* Race columns — grid on mobile (all bots visible), scroll row on desktop */}
+      <div
+        className={`flex-1 min-h-0 grid gap-1.5 auto-rows-fr ${mobileGridClass(sorted.length)} md:flex md:gap-6 md:overflow-x-auto md:min-w-fit md:pb-4`}
+      >
+        {sorted.map((racer) => (
+          <RacerColumn
+            key={racer.id}
+            racer={racer}
+            startPage={race.startPageTitle}
+            maxClicks={race.maxClicks}
+          />
+        ))}
       </div>
 
-      {/* Cost breakdown table */}
+      {/* Cost breakdown — always on desktop; on mobile only after race finishes */}
       {totalRaceCost > 0 && (
-        <div className="mt-8 border-t border-white/15 pt-6">
+        <div className={`shrink-0 mt-4 md:mt-8 border-t border-white/15 pt-4 md:pt-6 ${allDone ? '' : 'hidden md:block'}`}>
           <h3 className="text-xs tracking-widest uppercase text-gray-400 mb-3">COST BREAKDOWN</h3>
           <div className="overflow-x-auto">
             <table className="text-xs font-mono w-full max-w-2xl border-collapse">
